@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VéloTracker · Mario</title>
+<style>
+:root{
+  --orange:#FC4C02;--od:#c93a00;
+  --bg:#0f0f0f;--card:#1a1a1a;--card2:#222;
+  --border:#2e2e2e;--text:#f0f0f0;--muted:#888;
+  --green:#22c55e;--blue:#3b82f6;--yellow:#f59e0b;--purple:#c084fc;--red:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:80px}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;font-size:10px;color:var(--muted);cursor:pointer;transition:color .15s;gap:4px;border:none;background:transparent}
+.nav-item.active{color:var(--orange)}
+.nav-icon{font-size:20px;line-height:1}
+
+/* HEADER */
+.hdr{background:var(--card);border-bottom:1px solid var(--border);padding:15px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.hdr h1{font-size:16px;font-weight:700}.hdr h1 span{color:var(--orange)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+
+/* CONTAINER */
+.c{max-width:680px;margin:0 auto;padding:18px 14px}
+
+/* SECTION TITLE */
+.st{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:10px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+
+/* PROGRESS */
+.prog-bar{height:5px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;border-radius:99px;transition:width .6s}
+.fill-km{background:var(--yellow)}.fill-dp{background:var(--blue)}.fill-g{background:var(--green)}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.badge-ht{background:#1a0f28;color:var(--purple)}
+.badge-route{background:#0a1a10;color:var(--green)}
+.badge-off{background:#1c1c1c;color:var(--muted)}
+.badge-big{background:#1a1400;color:var(--yellow)}
+
+/* FTP ZONES */
+.fz{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;margin-left:3px}
+.z1{background:#111;color:var(--muted)}.z2{background:#0a1a10;color:var(--green)}
+.z3{background:#1a1500;color:var(--yellow)}.z4{background:#1a0e00;color:#fb923c}.z5{background:#1a0505;color:#f87171}
+
+/* BUTTON */
+.btn{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--orange);color:var(--orange)}
+.btn-primary{background:var(--orange);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-primary:hover{background:var(--od)}
+.btn-full{width:100%;justify-content:center}
+
+/* INPUT */
+.inp-group label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.inp-group input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-size:14px;font-weight:600}
+.inp-group input:focus{outline:none;border-color:var(--orange)}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+/* STEP */
+.step{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-n{width:22px;height:22px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0;margin-top:2px}
+.step-b .step-t{font-size:13px;font-weight:600;margin-bottom:3px}
+.step-b .step-d{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab-btn{flex:1;padding:10px;font-size:12px;font-weight:600;color:var(--muted);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--orange)}
+.tab-pane{display:none;padding:14px 0}.tab-pane.active{display:block}
+
+/* ERROR */
+.err{background:#1a0505;border:1px solid #5a1a1a;color:#f87171;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none}
+.err.on{display:block}
+
+/* CHIPS */
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:all .15s;background:transparent}
+.chip.active{background:var(--orange);border-color:var(--orange);color:#fff}
+
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+
+@media(max-width:480px){.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PAGE 1 : TABLEAU DE BORD
+══════════════════════════════════════════ -->
+<div id="page-dashboard" class="page active">
+<header class="hdr">
+  <h1>Vélo<span>Tracker</span> · Mario</h1>
+  <div class="hdr-right">
+    <span id="hdr-strava" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+</header>
+<div class="c">
+
+  <div class="st">Météo — Suisse Normande</div>
+  <div class="card" id="weather-card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div id="weather-icon" style="font-size:40px;line-height:1">⏳</div>
+    <div style="flex:1;min-width:160px">
+      <div id="weather-main" style="font-size:22px;font-weight:700">Chargement…</div>
+      <div id="weather-sub" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
+    </div>
+    <div id="weather-advice" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;flex:1;min-width:180px;line-height:1.5"></div>
+  </div>
+
+  <div class="st">Avance · Retard</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card" style="padding:14px 16px">
+      <div class="st" style="margin-bottom:6px">Kilomètres</div>
+      <div style="font-size:24px;font-weight:700" id="pace-km-val">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="pace-km-lab"></div>
+      <div class="prog-bar"><div class="prog-fill fill-km" id="pb-km" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px" id="pb-km-pct"></div>
+    </div>
+    <div class="card" style="padding:14px 16px">
+      <div class="st" style="margin-bottom:6px">Dénivelé</div>
+      <div style="font-size:24px;font-weight:700" id="pace-dp-val">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="pace-dp-lab"></div>
+      <div class="prog-bar"><div class="prog-fill fill-dp" id="pb-dp" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px" id="pb-dp-pct"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="st">Rythme nécessaire · <span id="wl-weeks">30</span> semaines restantes</div>
+    <div class="g3">
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700" id="r-km">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">km / semaine</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700" id="r-dp">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">m D+ / semaine</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700" id="r-days">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">jours restants</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st">Charge hebdomadaire estimée</div>
+  <div class="card" id="fatigue-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div style="font-size:22px;font-weight:700" id="tss-val">400 TSS</div>
+        <div style="font-size:12px;color:var(--muted)" id="tss-label">Charge modérée</div>
+      </div>
+      <div style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:3px solid" id="fatigue-circle">😐</div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.5" id="tss-tip"></div>
+    <div style="margin-top:14px">
+      <div class="st" style="margin-bottom:8px">Répartition des séances</div>
+      <div id="tss-bars"></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+      Ajuste ta charge selon ta semaine réelle :
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap" id="week-chips"></div>
+    </div>
+  </div>
+
+  <div class="st">Paliers km</div>
+  <div id="pal-km" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px"></div>
+  <div class="st">Paliers D+</div>
+  <div id="pal-dp" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px"></div>
+
+  <div class="st">Saisie manuelle</div>
+  <div class="card">
+    <div class="g3" style="margin-bottom:12px">
+      <div class="inp-group"><label>Km totaux</label><input type="number" id="i-km" placeholder="1250"></div>
+      <div class="inp-group"><label>D+ (m)</label><input type="number" id="i-dp" placeholder="12500"></div>
+      <div class="inp-group"><label>FTP (W)</label><input type="number" id="i-ftp" placeholder="205"></div>
+    </div>
+    <button class="btn-primary btn-full" id="save-btn" onclick="saveManual()">💾 Sauvegarder</button>
+  </div>
+
+  <div id="success" style="display:none;background:#0a2a0a;border:1px solid var(--green);border-radius:14px;padding:22px;text-align:center;margin-bottom:14px">
+    <div style="font-size:20px;color:var(--green);font-weight:700;margin-bottom:6px">🏆 Double objectif atteint !</div>
+    <div style="font-size:13px;color:#a3e7b8">5 000 km ET 50 000 m D+ — commande le vélo.</div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 2 : PROGRAMME
+══════════════════════════════════════════ -->
+<div id="page-programme" class="page">
+<header class="hdr">
+  <h1>Programme <span>hebdo</span></h1>
+  <div class="hdr-right">
+    <span style="font-size:12px;color:var(--muted)" id="hdr-ftp">FTP : 205W</span>
+  </div>
+</header>
+<div class="c">
+  <div class="st">FTP actuelle</div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <input type="number" id="ftp-inp" placeholder="205" style="width:100px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:16px;font-weight:700">
+    <button class="btn" onclick="updateFtp()">Mettre à jour</button>
+    <span style="font-size:12px;color:var(--muted)">Toutes les zones se recalculent</span>
+  </div>
+  <div class="st">Séances de la semaine</div>
+  <div id="program"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 : TRACES GPS
+══════════════════════════════════════════ -->
+<div id="page-traces" class="page">
+<header class="hdr">
+  <h1>Traces <span>GPS</span></h1>
+  <div class="hdr-right">
+    <span style="font-size:12px;color:var(--muted)">Suisse Normande</span>
+  </div>
+</header>
+<div class="c">
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="chip active" onclick="filterTraces('all',this)">Toutes</button>
+    <button class="chip" onclick="filterTraces('endurance',this)">Endurance Z2</button>
+    <button class="chip" onclick="filterTraces('tempo',this)">Tempo / Côtes</button>
+    <button class="chip" onclick="filterTraces('grande',this)">Grande sortie</button>
+    <button class="chip" onclick="filterTraces('montagne',this)">Montagne</button>
+  </div>
+  <div id="traces-list"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 4 : STRAVA
+══════════════════════════════════════════ -->
+<div id="page-strava" class="page">
+<header class="hdr">
+  <h1>Connexion <span>Strava</span></h1>
+</header>
+<div class="c">
+  <div id="strava-err" class="err"></div>
+
+  <div id="section-connect">
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:48px;height:48px;background:#1a0a00;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">🔗</div>
+        <div>
+          <div style="font-size:15px;font-weight:700">Connecter ton compte Strava</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">Synchronise automatiquement km + D+</div>
+        </div>
+      </div>
+      <div style="background:var(--card2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--muted);line-height:1.6">
+        <div style="font-weight:600;color:var(--text);margin-bottom:6px">Étapes pour obtenir les clés :</div>
+        1. Va sur <a href="https://www.strava.com/settings/api" target="_blank" style="color:var(--orange)">strava.com/settings/api</a><br>
+        2. Crée ou ouvre ton app "Mon Tracker"<br>
+        3. Dans <em>Authorization Callback Domain</em>, mets l'adresse de ce site<br>
+        4. Copie le <strong style="color:var(--text)">Client ID</strong> et le <strong style="color:var(--text)">Client Secret</strong>
+      </div>
+      <div class="inp-group" style="margin-bottom:12px"><label>Client ID</label><input type="text" id="cid" placeholder="ex: 123456"></div>
+      <div class="inp-group" style="margin-bottom:16px"><label>Client Secret</label><input type="password" id="csec" placeholder="Colle le secret ici"></div>
+      <button class="btn-primary btn-full" onclick="startOAuth()">Autoriser sur Strava →</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;line-height:1.6">
+      Tes clés sont stockées <strong>uniquement sur ton téléphone</strong>.<br>
+      Elles ne sont jamais envoyées ailleurs que vers Strava.
+    </div>
+  </div>
+
+  <div id="section-connected" style="display:none">
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="width:48px;height:48px;background:#0a1a0a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">✅</div>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--green)">Strava connecté</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px" id="athlete-label">Chargement…</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--card2);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:var(--yellow)" id="s-km">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">km en 2026</div>
+        </div>
+        <div style="background:var(--card2);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:700;color:var(--blue)" id="s-dp">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">m D+ en 2026</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;text-align:center" id="s-last-sync">Jamais synchronisé</div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" id="sync-btn" onclick="doSync()" style="flex:2">↻ Synchroniser maintenant</button>
+        <button class="btn" onclick="disconnect()" style="color:var(--red);border-color:#3a1a1a;flex:1">Déconnecter</button>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px">
+      <strong style="color:var(--text)">Données comptabilisées :</strong> Ride · VirtualRide · GravelRide · MountainBikeRide<br>
+      <strong style="color:var(--text)">Période :</strong> 1er janvier 2026 → aujourd'hui
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION FIXE
+══════════════════════════════════════════ -->
+<nav class="nav">
+  <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+    <span class="nav-icon">📊</span>Tableau de bord
+  </button>
+  <button class="nav-item" id="nav-programme" onclick="showPage('programme')">
+    <span class="nav-icon">📅</span>Programme
+  </button>
+  <button class="nav-item" id="nav-traces" onclick="showPage('traces')">
+    <span class="nav-icon">🗺️</span>Traces GPS
+  </button>
+  <button class="nav-item" id="nav-strava" onclick="showPage('strava')">
+    <span class="nav-icon">⚡</span>Strava
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     SHARED JS (reconstitué + logique pages)
+══════════════════════════════════════════ -->
+<script>
+// ── CONSTANTS ────────────────────────────────────────────
+const TARGET_KM = 5000;
+const TARGET_DP = 50000;
+const DEADLINE = new Date('2026-12-31');
+const START = new Date('2026-01-01');
+
+// ── STATE ────────────────────────────────────────────────
+let S = {km:0, dp:0, ftp:205, strava_token:null, strava_refresh:null,
+         strava_expires:null, strava_athlete:null, strava_client_id:null,
+         strava_client_secret:null, last_sync:null};
+
+function loadState(){
+  try{ const r=localStorage.getItem('velotacker'); if(r) S={...S,...JSON.parse(r)}; }catch(e){}
+}
+function saveState(){
+  try{ localStorage.setItem('velotacker',JSON.stringify(S)); }catch(e){}
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+function pct(v,t){ return Math.min(100,Math.round(v/t*100)); }
+function w(ftp,pct){ return Math.round(ftp*pct/100)+'W'; }
+
+function weeksLeft(){
+  const now=new Date();
+  const diff=(DEADLINE-now)/(1000*60*60*24*7);
+  return Math.max(1,Math.round(diff));
+}
+function daysToDeadline(){
+  const diff=(DEADLINE-new Date())/(1000*60*60*24);
+  return Math.max(0,Math.round(diff));
+}
+function daysSinceStart(){
+  const diff=(new Date()-START)/(1000*60*60*24);
+  return Math.max(1,diff);
+}
+function totalDays(){ return (DEADLINE-START)/(1000*60*60*24); }
+
+function paceKm(){
+  const expected = TARGET_KM * (daysSinceStart()/totalDays());
+  return S.km - expected;
+}
+function paceDp(){
+  const expected = TARGET_DP * (daysSinceStart()/totalDays());
+  return S.dp - expected;
+}
+
+function fatigueLevel(tss){
+  if(tss < 200) return {label:'Légère', color:'var(--green)', tip:'Charge très légère. Tu peux ajouter une séance ou intensifier.'};
+  if(tss < 300) return {label:'Modérée', color:'var(--green)', tip:'Bonne charge d\'entretien. Idéal pour progresser sans se surmener.'};
+  if(tss < 450) return {label:'Modérée–Élevée', color:'var(--yellow)', tip:'Semaine de construction. Dors bien et mange assez pour récupérer.'};
+  if(tss < 600) return {label:'Élevée', color:'var(--orange)', tip:'Semaine chargée. Surveille la fatigue, prévoir une semaine allégée après.'};
+  return {label:'Très élevée', color:'var(--red)', tip:'⚠️ Surcharge. Risque de surentraînement. Réduis la charge ou prends un jour off.'};
+}
+
+// ── STRAVA SYNC ───────────────────────────────────────────
+async function refreshIfNeeded(){
+  if(!S.strava_token) return false;
+  if(S.strava_expires && Date.now()/1000 < S.strava_expires-60) return true;
+  if(!S.strava_refresh || !S.strava_client_id || !S.strava_client_secret) return false;
+  try{
+    const r=await fetch('https://www.strava.com/oauth/token',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({client_id:S.strava_client_id,client_secret:S.strava_client_secret,
+        refresh_token:S.strava_refresh,grant_type:'refresh_token'})});
+    const d=await r.json();
+    if(!d.access_token) return false;
+    S.strava_token=d.access_token; S.strava_refresh=d.refresh_token;
+    S.strava_expires=d.expires_at; saveState();
+    return true;
+  }catch(e){ return false; }
+}
+
+async function syncStrava(onProgress){
+  const ok=await refreshIfNeeded();
+  if(!ok) throw new Error('Token invalide ou expiré. Reconnecte Strava.');
+  let page=1, totalKm=0, totalDp=0, count=0;
+  const after=Math.floor(new Date('2026-01-01').getTime()/1000);
+  const types=['Ride','VirtualRide','GravelRide','MountainBikeRide'];
+  while(true){
+    const r=await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=100&page=${page}`,
+      {headers:{Authorization:'Bearer '+S.strava_token}});
+    const acts=await r.json();
+    if(!Array.isArray(acts)||acts.length===0) break;
+    acts.forEach(a=>{ if(types.includes(a.type)){ totalKm+=a.distance/1000; totalDp+=a.total_elevation_gain; count++; } });
+    if(onProgress) onProgress(count);
+    if(acts.length<100) break;
+    page++;
+  }
+  S.km=Math.round(totalKm*10)/10;
+  S.dp=Math.round(totalDp);
+  S.last_sync=Date.now();
+  saveState();
+  return true;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+const PAGES = ['dashboard','programme','traces','strava'];
+let currentPage = 'dashboard';
+
+function showPage(id){
+  PAGES.forEach(p=>{
+    document.getElementById('page-'+p).classList.toggle('active', p===id);
+    document.getElementById('nav-'+p).classList.toggle('active', p===id);
+  });
+  currentPage = id;
+  // Lazy init
+  if(id==='programme') initProgramme();
+  if(id==='traces') renderTraces();
+  if(id==='strava') initStrava();
+  if(id==='dashboard') renderDashboard();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+const SESSIONS = [
+  {name:'Mar — HT Sweet Spot', tss:90, color:'var(--purple)'},
+  {name:'Mer — Route Z2', tss:55, color:'var(--green)'},
+  {name:'Jeu — HT Seuil', tss:75, color:'var(--purple)'},
+  {name:'Ven — Tempo+Côtes', tss:70, color:'var(--green)'},
+  {name:'Dim — Grande sortie', tss:110, color:'var(--yellow)'},
+];
+let activeWeek = [0,1,2,3,4];
+
+function renderFatigue(){
+  const total = activeWeek.reduce((s,i)=>s+SESSIONS[i].tss,0);
+  const lvl = fatigueLevel(total);
+  document.getElementById('tss-val').textContent = total+' TSS';
+  document.getElementById('tss-label').textContent = 'Charge '+lvl.label.toLowerCase();
+  document.getElementById('tss-tip').textContent = lvl.tip;
+  const circle = document.getElementById('fatigue-circle');
+  circle.style.borderColor = lvl.color;
+  circle.textContent = total<300?'😊':total<400?'💪':total<500?'😤':'🔥';
+
+  const bars = document.getElementById('tss-bars');
+  const maxTss = 120;
+  bars.innerHTML = SESSIONS.map((s,i)=>{
+    const on = activeWeek.includes(i);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;opacity:${on?1:0.35}">
+      <div style="font-size:11px;color:var(--muted);width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+      <div style="flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${on?Math.round(s.tss/maxTss*100):0}%;background:${s.color};border-radius:99px;transition:width .4s"></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted);width:40px;text-align:right">${on?s.tss:0} TSS</div>
+    </div>`;
+  }).join('');
+
+  const chips = document.getElementById('week-chips');
+  chips.innerHTML = SESSIONS.map((s,i)=>`
+    <div class="chip ${activeWeek.includes(i)?'active':''}" onclick="toggleSession(${i})">${s.name.split('—')[0].trim()}</div>
+  `).join('');
+}
+
+function toggleSession(i){
+  if(activeWeek.includes(i)) activeWeek=activeWeek.filter(x=>x!==i);
+  else activeWeek.push(i);
+  renderFatigue();
+}
+
+function renderPace(){
+  const km=S.km, dp=S.dp, wl=weeksLeft();
+  const pkm=paceKm(), pdp=paceDp();
+
+  const pkmEl=document.getElementById('pace-km-val');
+  pkmEl.textContent=(pkm>=0?'+':'')+fmt(pkm)+' km';
+  pkmEl.style.color=pkm>=0?'var(--green)':'var(--red)';
+  document.getElementById('pace-km-lab').textContent=pkm>=0?'En avance sur le rythme':'En retard sur le rythme';
+  document.getElementById('pb-km').style.width=pct(km,TARGET_KM)+'%';
+  document.getElementById('pb-km-pct').textContent=pct(km,TARGET_KM)+'% — reste '+fmt(TARGET_KM-km)+' km';
+
+  const pdpEl=document.getElementById('pace-dp-val');
+  pdpEl.textContent=(pdp>=0?'+':'')+fmt(pdp)+' m';
+  pdpEl.style.color=pdp>=0?'var(--green)':'var(--red)';
+  document.getElementById('pace-dp-lab').textContent=pdp>=0?'En avance sur le rythme':'En retard sur le rythme';
+  document.getElementById('pb-dp').style.width=pct(dp,TARGET_DP)+'%';
+  document.getElementById('pb-dp-pct').textContent=pct(dp,TARGET_DP)+'% — reste '+fmt(TARGET_DP-dp)+' m';
+
+  document.getElementById('wl-weeks').textContent=wl;
+  document.getElementById('r-km').textContent=fmt(Math.ceil((TARGET_KM-km)/wl))+' km';
+  document.getElementById('r-dp').textContent=fmt(Math.ceil((TARGET_DP-dp)/wl))+' m';
+  document.getElementById('r-days').textContent=daysToDeadline();
+
+  const ke=document.getElementById('pal-km'), de=document.getElementById('pal-dp');
+  ke.innerHTML=''; de.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const v=i*500,done=km>=v;
+    ke.innerHTML+=`<div style="background:var(--card);border:1px solid ${done?'var(--green)':'var(--border)'};border-radius:8px;padding:8px 4px;text-align:center;${done?'background:#0a1a10':''}"><div style="font-size:11px;font-weight:700;color:${done?'var(--green)':'var(--muted)'}">${v}</div><div style="font-size:9px;color:var(--muted);margin-top:2px">${done?'✓':'km'}</div></div>`;
+  }
+  for(let i=1;i<=10;i++){
+    const v=i*5000,done=dp>=v;
+    de.innerHTML+=`<div style="background:var(--card);border:1px solid ${done?'var(--green)':'var(--border)'};border-radius:8px;padding:8px 4px;text-align:center;${done?'background:#0a1a10':''}"><div style="font-size:11px;font-weight:700;color:${done?'var(--green)':'var(--muted)'}">${fmt(v)}</div><div style="font-size:9px;color:var(--muted);margin-top:2px">${done?'✓':'m D+'}</div></div>`;
+  }
+
+  if(km>=TARGET_KM&&dp>=TARGET_DP) document.getElementById('success').style.display='block';
+
+  const hdrs=document.getElementById('hdr-strava');
+  if(S.strava_token) hdrs.textContent=S.last_sync?'Strava ✓ · '+new Date(S.last_sync).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'Strava connecté';
+  else hdrs.innerHTML='<span style="color:var(--orange);cursor:pointer" onclick="showPage(\'strava\')">Connecter Strava →</span>';
+
+  document.getElementById('i-km').value=S.km||'';
+  document.getElementById('i-dp').value=S.dp||'';
+  document.getElementById('i-ftp').value=S.ftp||'';
+}
+
+function renderDashboard(){
+  renderPace();
+  renderFatigue();
+}
+
+function saveManual(){
+  const km=parseFloat(document.getElementById('i-km').value)||S.km;
+  const dp=parseFloat(document.getElementById('i-dp').value)||S.dp;
+  const ftp=parseFloat(document.getElementById('i-ftp').value)||S.ftp;
+  S={...S,km,dp,ftp};
+  saveState(); renderPace(); renderFatigue();
+  const btn=document.getElementById('save-btn');
+  btn.textContent='✓ Sauvegardé !';
+  setTimeout(()=>btn.textContent='💾 Sauvegarder',1500);
+}
+
+async function loadWeather(){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.924&longitude=-0.474&current=temperature_2m,apparent_temperature,precipitation,windspeed_10m,weathercode&timezone=Europe/Paris&forecast_days=1');
+    const d=await r.json();
+    const c=d.current;
+    const temp=Math.round(c.temperature_2m), feel=Math.round(c.apparent_temperature);
+    const wind=Math.round(c.windspeed_10m), rain=c.precipitation, code=c.weathercode;
+    const icons={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈'};
+    const labels={0:'Ciel dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',51:'Bruine légère',53:'Bruine',55:'Bruine forte',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',80:'Averses légères',81:'Averses',82:'Averses fortes',95:'Orage'};
+    document.getElementById('weather-icon').textContent=icons[code]||'🌡';
+    document.getElementById('weather-main').textContent=temp+'°C · '+(labels[code]||'Conditions variables');
+    document.getElementById('weather-sub').textContent=`Ressenti ${feel}°C · Vent ${wind} km/h · Pluie ${rain} mm`;
+    let advice='';
+    if(rain>0.5||[61,63,65,80,81,82,95].includes(code)) advice='🧥 Cape de pluie obligatoire. Évite les sorties longues, préfère le home trainer aujourd\'hui.';
+    else if(temp<5) advice='🧤 Gants chauds + couvre-chaussures + veste coupe-vent. Couche thermique sous le maillot.';
+    else if(temp<10) advice='🧤 Gants légers + manchettes + coupe-vent. Veste sur le retour si longue sortie.';
+    else if(temp<15) advice='🦺 Veste légère ou gilet. Manchettes en option. Bas longs conseillés.';
+    else if(temp<20) advice='👕 Maillot manches longues ou veste coupe-vent très légère. Cuissard classique.';
+    else advice='👕 Maillot manches courtes + cuissard. Crème solaire si >2h de sortie.';
+    if(wind>35) advice+=' ⚠️ Vent fort — attention aux descentes.';
+    document.getElementById('weather-advice').textContent=advice;
+  }catch(e){
+    document.getElementById('weather-main').textContent='Météo indisponible';
+    document.getElementById('weather-sub').textContent='Vérifie ta connexion';
+    document.getElementById('weather-advice').textContent='';
+  }
+}
+
+// ── PROGRAMME ─────────────────────────────────────────────
+let programmeInit = false;
+function initProgramme(){
+  if(programmeInit) return;
+  programmeInit = true;
+  document.getElementById('ftp-inp').value = S.ftp||205;
+  document.getElementById('hdr-ftp').textContent='FTP : '+(S.ftp||205)+'W';
+  renderProgram(S.ftp||205);
+}
+
+function updateFtp(){
+  const v=parseFloat(document.getElementById('ftp-inp').value);
+  if(!v) return;
+  S.ftp=v; saveState();
+  document.getElementById('hdr-ftp').textContent='FTP : '+v+'W';
+  programmeInit=false; renderProgram(v); programmeInit=true;
+}
+
+function stepsHtml(steps){
+  return steps.map((s,i)=>`
+    <div class="step">
+      <div class="step-n">${i+1}</div>
+      <div class="step-b"><div class="step-t">${s.t}</div><div class="step-d">${s.d}</div></div>
+    </div>`).join('');
+}
+
+function renderProgram(ftp){
+  const days=[
+    {id:'lun',name:'Lundi',sub:'Récupération',type:'off',badge:null,tss:0,
+     only:[{t:'Repos ou récup active',d:'Marche, étirements, foam roller. Aucun effort vélo.'}]},
+    {id:'mar',name:'Mardi',sub:'Sweet Spot + VO2max',type:'ht',badge:'55 min',tss:90,
+     ht:[
+       {t:'Échauffement 10 min',d:`Z1→Z2 progressif. Cadence 85–90 rpm. <span class="fz z2">56–75% = ${w(ftp,65)}</span>`},
+       {t:'Sweet Spot × 2 blocs de 15 min',d:`Récup 5 min entre. Maintiens <span class="fz z4">88–93% = ${w(ftp,90)}</span>. Cadence 88–92 rpm.`},
+       {t:'VO2max × 4 répétitions de 4 min',d:`Récup 3 min. <span class="fz z5">108–115% = ${w(ftp,111)}</span>. Effort inconfortable, cadence libre.`},
+       {t:'Retour au calme 5 min',d:`<span class="fz z1">${w(ftp,50)}</span>. Respiration qui redescend.`}
+     ],
+     ext:[
+       {t:'Échauffement 15 min',d:`Route vers le secteur côtes. <span class="fz z2">56–70% = ${w(ftp,63)}</span>`},
+       {t:'2 montées longues (10–15 min)',d:`Côte vers Clécy ou St-Rémy. Maintiens <span class="fz z4">88–93% = ${w(ftp,90)}</span>. Redescends doucement entre les deux.`},
+       {t:'4 sprints-côte de 2–3 min',d:`Bosse plus raide. <span class="fz z5">110%+ = ${w(ftp,111)}</span> en montant, récup en redescendant.`},
+       {t:'Retour base 15–20 min',d:'Z2 pour rentrer. Total ~50–60 km, 500–600 m D+.'}
+     ]},
+    {id:'mer',name:'Mercredi',sub:'Endurance Z2',type:'route',badge:'40–50 km',tss:55,
+     only:[
+       {t:'Z2 pur sur tout le trajet',d:`<span class="fz z2">56–75% = ${w(ftp,65)}</span>. Cadence 85–95 rpm. Peux-tu tenir une conversation ? C'est bon.`},
+       {t:'Côtes : ne dépasse pas Z3',d:`<span class="fz z3">80% max = ${w(ftp,80)}</span>. Rétrograde si nécessaire.`},
+       {t:'Itinéraires',d:'Clécy → Saint-Rémy → Thury-Harcourt (~45 km, 450 m D+) ou vallée de la Rouvre (~40 km, 380 m D+).'}
+     ]},
+    {id:'jeu',name:'Jeudi',sub:'Pyramide Seuil',type:'ht',badge:'50 min',tss:75,
+     ht:[
+       {t:'Échauffement 8 min',d:'3 × 20 sec sprint à fond + 40 sec récup pour activer les fibres rapides.'},
+       {t:'Pyramide seuil 5 – 8 – 5 min',d:`5 min <span class="fz z4">95–100% = ${w(ftp,97)}</span> · récup 4 min<br>8 min <span class="fz z4">95–105% = ${w(ftp,100)}</span> · récup 5 min<br>5 min <span class="fz z4">100–105% = ${w(ftp,102)}</span>`},
+       {t:'Retour au calme 5–8 min',d:`<span class="fz z1">${w(ftp,52)}</span>. Séance la plus dure de la semaine.`}
+     ],
+     ext:[
+       {t:'Échauffement 15 min',d:'Route jusqu\'à une montée de 8–15 min (Grimbosq, Mutrécy, Saint-Omer).'},
+       {t:'Pyramide en vraie côte',d:`Monte 3 fois en durées croissantes : 5 min <span class="fz z4">${w(ftp,97)}</span> → 8 min <span class="fz z4">${w(ftp,100)}</span> → 5 min <span class="fz z4">${w(ftp,102)}</span>. Redescends en récup entre chaque.`},
+       {t:'Rentre tranquillement',d:'Z1–Z2. Total ~40 km, 400–500 m D+.'}
+     ]},
+    {id:'ven',name:'Vendredi',sub:'Tempo + Côtes',type:'route',badge:'35–45 km',tss:70,
+     only:[
+       {t:'Échauffement 10 min',d:'Z1 léger pour préparer les jambes.'},
+       {t:'20 min Tempo Z3',d:`Maintiens <span class="fz z3">76–90% = ${w(ftp,83)}</span>. Effort soutenu mais contrôlé.`},
+       {t:'3 à 5 répétitions côtes 2–3 min',d:`<span class="fz z5">100–110% = ${w(ftp,105)}</span> en montant. Récup complète en redescendant.`},
+       {t:'Retour Z1–Z2',d:'Les 10–15 derniers km tranquilles. Prépare la grande sortie dimanche.'}
+     ]},
+    {id:'sam',name:'Samedi',sub:'Travail — repos forcé',type:'off',badge:null,tss:0,
+     only:[{t:'Journée de travail',d:'Repos cycliste. Mange bien et hydrate-toi pour la grande sortie du lendemain.'}]},
+    {id:'dim',name:'Dimanche',sub:'Grande sortie',type:'big',badge:'70–90 km',tss:110,
+     only:[
+       {t:'2 premières heures en Z2',d:`<span class="fz z2">60–75% = ${w(ftp,67)}</span>. Résiste à l'envie de partir fort.`},
+       {t:'Sur les montées',d:`Pointes jusqu'à <span class="fz z3">80–85% = ${w(ftp,82)}</span>.`},
+       {t:'Ravitaillement',d:'1 barre ou gel toutes les 45 min. 750 ml eau/heure.'},
+       {t:'Itinéraires suggérés',d:'Clécy → Pont-d\'Ouilly → Condé-sur-Noireau (~80 km, 850 m D+)<br>ou Boucle Méandres de l\'Orne (~70 km, 700 m D+).'}
+     ]}
+  ];
+
+  const typeLabel={ht:'HT',route:'ROUTE',off:'OFF',big:'SORTIE'};
+  const prog=document.getElementById('program');
+  prog.innerHTML='';
+
+  days.forEach(day=>{
+    const hasVariant=!day.only;
+    let detailHtml='';
+    if(hasVariant){
+      detailHtml=`<div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(event,'${day.id}','ht')">🏠 Home Trainer <span style="font-size:10px;opacity:.6">${day.tss} TSS</span></button>
+        <button class="tab-btn" onclick="switchTab(event,'${day.id}','ext')">🌿 Extérieur</button>
+      </div>
+      <div class="tab-pane active" id="tab-${day.id}-ht" style="padding:14px 16px">${stepsHtml(day.ht)}</div>
+      <div class="tab-pane" id="tab-${day.id}-ext" style="padding:14px 16px">${stepsHtml(day.ext)}</div>`;
+    } else {
+      detailHtml=`<div style="padding:14px 16px">${stepsHtml(day.only)}</div>`;
+    }
+    const tssTag=day.tss>0?`<span style="font-size:11px;color:var(--muted);margin-left:6px">${day.tss} TSS</span>`:'';
+    prog.innerHTML+=`
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px">
+        <div style="display:flex;align-items:center;padding:13px 16px;gap:11px;cursor:pointer" onclick="toggleDay('${day.id}')">
+          <div class="badge badge-${day.type}" style="width:46px;text-align:center;border-radius:8px;padding:4px 0">${typeLabel[day.type]}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600">${day.name}${tssTag}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:1px">${day.sub}</div>
+          </div>
+          ${day.badge?`<span class="badge badge-${day.type==='big'?'big':day.type}">${day.badge}</span>`:''}
+          <span id="chev-${day.id}" style="font-size:12px;color:var(--muted);transition:transform .2s">▸</span>
+        </div>
+        <div id="detail-${day.id}" style="display:none;border-top:1px solid var(--border)">${detailHtml}</div>
+      </div>`;
+  });
+}
+
+function toggleDay(id){
+  const d=document.getElementById('detail-'+id);
+  const c=document.getElementById('chev-'+id);
+  const open=d.style.display==='none';
+  d.style.display=open?'block':'none';
+  c.style.transform=open?'rotate(90deg)':'';
+}
+function switchTab(evt,dayId,tab){
+  const parent=document.getElementById('detail-'+dayId);
+  parent.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  parent.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  evt.currentTarget.classList.add('active');
+  document.getElementById('tab-'+dayId+'-'+tab).classList.add('active');
+}
+
+// ── TRACES ────────────────────────────────────────────────
+const TRACES=[
+  {id:'clecy-loop',cat:'endurance',name:'Boucle de Clécy',km:45,dp:450,diff:'Modéré',time:'1h30–1h45',
+   desc:'La classique de la Suisse Normande. Idéale pour les sorties Z2 du mercredi. Vallonné régulier, peu de trafic.',
+   tags:['Mercredi','Z2','45 km'],
+   komoot:'https://www.komoot.com/discover/Cl%C3%A9cy/@48.9240000,-0.4740000',
+   strava:'https://www.strava.com/segments/explore#48.924,-0.474,14z',
+   profile:'▁▂▃▄▃▂▁▂▃▄▃▂▁'},
+  {id:'rouvre-valley',cat:'endurance',name:'Vallée de la Rouvre',km:40,dp:380,diff:'Facile+',time:'1h20–1h35',
+   desc:'Longer la Rouvre sur route peu fréquentée. Parfait pour garder la zone Z2 sans stress. Sortie récupération ou mercredi léger.',
+   tags:['Mercredi','Z2','Récup','40 km'],
+   komoot:'https://www.komoot.com/discover/Rouvre/@48.8500000,-0.5500000',
+   strava:'https://www.strava.com/segments/explore#48.85,-0.55,13z',
+   profile:'▁▂▂▃▂▁▁▂▂▃▂▁'},
+  {id:'tempo-cotes',cat:'tempo',name:'Circuit Tempo + Côtes vendredi',km:38,dp:420,diff:'Soutenu',time:'1h15–1h30',
+   desc:'Sortie vendredi : 20 min Tempo en Z3 sur la première partie plate, puis 4 répétitions de côtes 2–3 min sur le secteur montagneux.',
+   tags:['Vendredi','Tempo','Répét côtes','35–45 km'],
+   komoot:'https://www.komoot.com/discover/Suisse-Normande/@48.9000000,-0.5000000',
+   strava:'https://www.strava.com/segments/explore#48.9,-0.5,13z',
+   profile:'▁▃▃▃▄▅▄▃▄▅▄▃▁'},
+  {id:'grande-orne',cat:'grande',name:"Boucle Méandres de l'Orne",km:72,dp:710,diff:'Modéré',time:'2h30–3h',
+   desc:"Grande sortie du dimanche. Suit les méandres de l'Orne. Départ Clécy, retour par Thury-Harcourt. Ravitaillement à Condé-sur-Noireau (km 45).",
+   tags:['Dimanche','Grande sortie','72 km'],
+   komoot:'https://www.komoot.com/discover/Cl%C3%A9cy/@48.924,-0.474,12z',
+   strava:'https://www.strava.com/segments/explore#48.85,-0.5,12z',
+   profile:'▁▂▃▄▃▄▅▄▃▄▃▂▁'},
+  {id:'grande-conde',cat:'grande',name:"Clécy → Pont-d'Ouilly → Condé",km:82,dp:850,diff:'Costaud',time:'2h45–3h30',
+   desc:"La grande boucle. Passe par Pont-d'Ouilly et Condé-sur-Noireau. Plusieurs vraies montées dans la seconde moitié. Prévois deux bidons et des barres.",
+   tags:['Dimanche','Grande sortie','82 km','D+ élevé'],
+   komoot:'https://www.komoot.com/discover/Pont-d-Ouilly/@48.8750000,-0.4100000',
+   strava:'https://www.strava.com/segments/explore#48.875,-0.41,12z',
+   profile:'▁▂▃▄▄▅▅▄▅▆▅▄▂▁'},
+  {id:'grimbosq-rep',cat:'tempo',name:'Répétitions forêt de Grimbosq',km:42,dp:500,diff:'Intensif',time:'1h30',
+   desc:'Côte de Grimbosq : 3 km à 5–7%. Idéale pour les répétitions du vendredi ou la variante extérieure du jeudi (pyramide). 4 à 5 passages selon ta forme.',
+   tags:['Vendredi','Jeudi EXT','Répét','Côtes'],
+   komoot:'https://www.komoot.com/discover/for%C3%AAt-de-Grimbosq/@49.0000000,-0.3500000',
+   strava:'https://www.strava.com/segments/explore#49.0,-0.35,13z',
+   profile:'▁▅▅▃▁▅▅▃▁▅▅▃▁'},
+  {id:'mont-pincon',cat:'montagne',name:'Mont Pinçon (exploration)',km:90,dp:1200,diff:'Difficile',time:'3h–3h45',
+   desc:'Objectif exploration quand tu seras plus fort. Point culminant de la Normandie (365 m). Plusieurs montées de 6–9%. À prévoir après 3 mois de progression.',
+   tags:['Exploration','Grande sortie','90 km','D+ élevé'],
+   komoot:'https://www.komoot.com/discover/Mont-Pin%C3%A7on/@48.9500000,-0.5800000',
+   strava:'https://www.strava.com/segments/explore#48.95,-0.58,12z',
+   profile:'▁▂▄▆▇▆▄▂▄▆▇▆▄▁'},
+  {id:'suisse-4000',cat:'montagne',name:'Défi 4000 m D+ (Suisse Normande)',km:130,dp:4100,diff:'Très difficile',time:'5h–6h',
+   desc:"L'objectif ultime local : enchaîner les cols et montées de la région pour atteindre 4000 m D+ en une seule journée. Pour quand tu as les 5000 km dans les jambes.",
+   tags:['Objectif futur','130 km','4000 m D+'],
+   komoot:'https://www.komoot.com/discover/Suisse-Normande/@48.9000000,-0.5000000',
+   strava:'https://www.strava.com/segments/explore#48.9,-0.5,11z',
+   profile:'▁▄▆▇▆▄▆▇▆▄▆▇▆▄▁'}
+];
+
+let currentFilter='all';
+
+function filterTraces(cat,btn){
+  currentFilter=cat;
+  document.querySelectorAll('#page-traces .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderTraces();
+}
+
+function diffColor(d){
+  if(d==='Facile+'||d==='Facile') return 'var(--green)';
+  if(d==='Modéré') return 'var(--yellow)';
+  if(d==='Soutenu'||d==='Intensif') return '#fb923c';
+  return 'var(--red)';
+}
+
+function renderTraces(){
+  const list=document.getElementById('traces-list');
+  const filtered=currentFilter==='all'?TRACES:TRACES.filter(t=>t.cat===currentFilter);
+  list.innerHTML=filtered.map(t=>`
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px">
+        <div>
+          <div style="font-size:15px;font-weight:700;margin-bottom:4px">${t.name}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${t.tags.map(tag=>`<span style="font-size:11px;background:var(--card2);border:1px solid var(--border);border-radius:99px;padding:2px 9px;color:var(--muted)">${tag}</span>`).join('')}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:18px;font-weight:700;color:var(--yellow)">${t.km} km</div>
+          <div style="font-size:12px;color:var(--blue)">${t.dp} m D+</div>
+        </div>
+      </div>
+      <div style="font-family:monospace;font-size:16px;letter-spacing:2px;color:var(--muted);margin:8px 0">${t.profile}</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:12px">${t.desc}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:12px;font-weight:700;color:${diffColor(t.diff)}">${t.diff}</span>
+          <span style="font-size:12px;color:var(--muted)">⏱ ${t.time}</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a href="${t.komoot}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:#2a1a00;border:1px solid #4a3200;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#f59e0b;text-decoration:none">🗺 Komoot</a>
+          <a href="${t.strava}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:#1a0a00;border:1px solid #4a1a00;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--orange);text-decoration:none">⚡ Strava</a>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── STRAVA PAGE ───────────────────────────────────────────
+function showErr(msg){ const e=document.getElementById('strava-err'); e.textContent=msg; e.classList.add('on'); }
+function hideErr(){ document.getElementById('strava-err').classList.remove('on'); }
+
+function updateStravaUI(){
+  if(S.strava_token){
+    document.getElementById('section-connect').style.display='none';
+    document.getElementById('section-connected').style.display='block';
+    const a=S.strava_athlete;
+    document.getElementById('athlete-label').textContent=a?a.firstname+' '+a.lastname+' · @'+a.username:'Compte Strava';
+    document.getElementById('s-km').textContent=S.km?fmt(S.km)+' km':'—';
+    document.getElementById('s-dp').textContent=S.dp?fmt(S.dp)+' m':'—';
+    if(S.last_sync) document.getElementById('s-last-sync').textContent='Dernière sync : '+new Date(S.last_sync).toLocaleDateString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+    if(S.strava_client_id) document.getElementById('cid').value=S.strava_client_id;
+  } else {
+    document.getElementById('section-connect').style.display='block';
+    document.getElementById('section-connected').style.display='none';
+    if(S.strava_client_id) document.getElementById('cid').value=S.strava_client_id;
+  }
+}
+
+function initStrava(){
+  updateStravaUI();
+  handleCallback();
+}
+
+async function handleCallback(){
+  const params=new URLSearchParams(location.search);
+  const code=params.get('code');
+  const err=params.get('error');
+  if(err){ showErr('Autorisation refusée par Strava.'); history.replaceState({},'',location.pathname); return; }
+  if(!code) return;
+  history.replaceState({},'',location.pathname);
+  if(!S.strava_client_id||!S.strava_client_secret){ showErr('Clés manquantes. Recommence la connexion.'); return; }
+  try{
+    const res=await fetch('https://www.strava.com/oauth/token',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({client_id:S.strava_client_id,client_secret:S.strava_client_secret,code,grant_type:'authorization_code'})});
+    const d=await res.json();
+    if(!d.access_token) throw new Error(d.message||'Token invalide. Vérifie le Client Secret.');
+    S.strava_token=d.access_token; S.strava_refresh=d.refresh_token;
+    S.strava_expires=d.expires_at; S.strava_athlete=d.athlete;
+    saveState(); updateStravaUI();
+    await doSync();
+  }catch(e){ showErr('Erreur Strava : '+e.message); }
+}
+
+function startOAuth(){
+  hideErr();
+  const cid=document.getElementById('cid').value.trim();
+  const sec=document.getElementById('csec').value.trim();
+  if(!cid||!sec){ showErr('Remplis le Client ID et le Client Secret.'); return; }
+  S.strava_client_id=cid; S.strava_client_secret=sec; saveState();
+  const redirect=location.href.split('?')[0].split('#')[0];
+  location.href=`https://www.strava.com/oauth/authorize?client_id=${cid}&response_type=code&redirect_uri=${encodeURIComponent(redirect)}&scope=activity:read_all&approval_prompt=auto`;
+}
+
+async function doSync(){
+  hideErr();
+  const btn=document.getElementById('sync-btn');
+  btn.textContent='⏳ Synchronisation…'; btn.disabled=true;
+  try{
+    await syncStrava(n=>{ btn.textContent=`⏳ ${n} activités…`; });
+    updateStravaUI();
+  }catch(e){ showErr('Erreur : '+e.message); }
+  btn.textContent='↻ Synchroniser maintenant'; btn.disabled=false;
+}
+
+function disconnect(){
+  if(!confirm('Déconnecter Strava ? Tes données km/D+ seront conservées.')) return;
+  S.strava_token=null; S.strava_refresh=null; S.strava_expires=null;
+  S.strava_client_id=null; S.strava_client_secret=null; S.strava_athlete=null;
+  saveState(); updateStravaUI();
+}
+
+// ── INIT ─────────────────────────────────────────────────
+loadState();
+renderDashboard();
+loadWeather();
+// Check if Strava callback arrived
+if(new URLSearchParams(location.search).get('code')){
+  showPage('strava');
+}
+</script>
+</body>
+</html>
