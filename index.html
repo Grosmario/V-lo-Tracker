@@ -1,0 +1,276 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VéloTracker · Tableau de bord</title>
+<link rel="stylesheet" href="shared.css">
+</head><body>
+
+<header class="hdr">
+  <h1>Vélo<span>Tracker</span> · Mario</h1>
+  <div class="hdr-right">
+    <span id="hdr-strava" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+</header>
+
+<div class="c">
+
+  <!-- METEO -->
+  <div class="st">Météo — Suisse Normande</div>
+  <div class="card" id="weather-card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div id="weather-icon" style="font-size:40px;line-height:1">⏳</div>
+    <div style="flex:1;min-width:160px">
+      <div id="weather-main" style="font-size:22px;font-weight:700">Chargement…</div>
+      <div id="weather-sub" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
+    </div>
+    <div id="weather-advice" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;flex:1;min-width:180px;line-height:1.5"></div>
+  </div>
+
+  <!-- AVANCE / RETARD -->
+  <div class="st">Avance · Retard</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card" style="padding:14px 16px">
+      <div class="st" style="margin-bottom:6px">Kilomètres</div>
+      <div style="font-size:24px;font-weight:700" id="pace-km-val">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="pace-km-lab"></div>
+      <div class="prog-bar"><div class="prog-fill fill-km" id="pb-km" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px" id="pb-km-pct"></div>
+    </div>
+    <div class="card" style="padding:14px 16px">
+      <div class="st" style="margin-bottom:6px">Dénivelé</div>
+      <div style="font-size:24px;font-weight:700" id="pace-dp-val">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="pace-dp-lab"></div>
+      <div class="prog-bar"><div class="prog-fill fill-dp" id="pb-dp" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px" id="pb-dp-pct"></div>
+    </div>
+  </div>
+
+  <!-- RYTHME -->
+  <div class="card">
+    <div class="st">Rythme nécessaire · <span id="wl-weeks">30</span> semaines restantes</div>
+    <div class="g3">
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700" id="r-km">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">km / semaine</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700" id="r-dp">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">m D+ / semaine</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700" id="r-days">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">jours restants</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARGE / FATIGUE -->
+  <div class="st">Charge hebdomadaire estimée</div>
+  <div class="card" id="fatigue-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div style="font-size:22px;font-weight:700" id="tss-val">400 TSS</div>
+        <div style="font-size:12px;color:var(--muted)" id="tss-label">Charge modérée</div>
+      </div>
+      <div style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:3px solid" id="fatigue-circle">😐</div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.5" id="tss-tip"></div>
+    <div style="margin-top:14px">
+      <div class="st" style="margin-bottom:8px">Répartition des séances</div>
+      <div id="tss-bars"></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+      Ajuste ta charge selon ta semaine réelle :
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap" id="week-chips"></div>
+    </div>
+  </div>
+
+  <!-- PALIERS -->
+  <div class="st">Paliers km</div>
+  <div id="pal-km" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px"></div>
+  <div class="st">Paliers D+</div>
+  <div id="pal-dp" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px"></div>
+
+  <!-- SAISIE MANUELLE -->
+  <div class="st">Saisie manuelle</div>
+  <div class="card">
+    <div class="g3" style="margin-bottom:12px">
+      <div class="inp-group"><label>Km totaux</label><input type="number" id="i-km" placeholder="1250"></div>
+      <div class="inp-group"><label>D+ (m)</label><input type="number" id="i-dp" placeholder="12500"></div>
+      <div class="inp-group"><label>FTP (W)</label><input type="number" id="i-ftp" placeholder="205"></div>
+    </div>
+    <button class="btn-primary btn-full" onclick="saveManual()">💾 Sauvegarder</button>
+  </div>
+
+  <div id="success" style="display:none;background:#0a2a0a;border:1px solid var(--green);border-radius:14px;padding:22px;text-align:center;margin-bottom:14px">
+    <div style="font-size:20px;color:var(--green);font-weight:700;margin-bottom:6px">🏆 Double objectif atteint !</div>
+    <div style="font-size:13px;color:#a3e7b8">5 000 km ET 50 000 m D+ — commande le vélo.</div>
+  </div>
+</div>
+
+<div id="nav-placeholder"></div>
+<script src="shared.js"></script>
+<script>
+document.getElementById('nav-placeholder').outerHTML = navHTML();
+markNav();
+loadState();
+
+// ── WEATHER ──────────────────────────────────────────────
+async function loadWeather(){
+  try{
+    // Clécy, Suisse Normande: lat 48.924, lon -0.474
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.924&longitude=-0.474&current=temperature_2m,apparent_temperature,precipitation,windspeed_10m,weathercode&hourly=precipitation_probability&timezone=Europe/Paris&forecast_days=1');
+    const d = await r.json();
+    const c = d.current;
+    const temp = Math.round(c.temperature_2m);
+    const feel = Math.round(c.apparent_temperature);
+    const wind = Math.round(c.windspeed_10m);
+    const rain = c.precipitation;
+    const code = c.weathercode;
+
+    const icons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈'};
+    const labels = {0:'Ciel dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',51:'Bruine légère',53:'Bruine',55:'Bruine forte',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',80:'Averses légères',81:'Averses',82:'Averses fortes',95:'Orage'};
+
+    const icon = icons[code]||'🌡';
+    const label = labels[code]||'Conditions variables';
+
+    document.getElementById('weather-icon').textContent = icon;
+    document.getElementById('weather-main').textContent = temp+'°C · '+label;
+    document.getElementById('weather-sub').textContent = `Ressenti ${feel}°C · Vent ${wind} km/h · Pluie ${rain} mm`;
+
+    // Clothing advice
+    let advice = '';
+    if(rain > 0.5 || [61,63,65,80,81,82,95].includes(code)){
+      advice = '🧥 Cape de pluie obligatoire. Évite les sorties longues, préfère le home trainer aujourd\'hui.';
+    } else if(temp < 5){
+      advice = '🧤 Gants chauds + couvre-chaussures + veste coupe-vent. Couche thermique sous le maillot.';
+    } else if(temp < 10){
+      advice = '🧤 Gants légers + manchettes + coupe-vent. Veste sur le retour si longue sortie.';
+    } else if(temp < 15){
+      advice = '🦺 Veste légère ou gilet. Manchettes en option. Bas longs conseillés.';
+    } else if(temp < 20){
+      advice = '👕 Maillot manches longues ou veste coupe-vent très légère. Cuissard classique.';
+    } else {
+      advice = '👕 Maillot manches courtes + cuissard. Crème solaire si >2h de sortie.';
+    }
+    if(wind > 35) advice += ' ⚠️ Vent fort — attention aux descentes.';
+    document.getElementById('weather-advice').textContent = advice;
+  } catch(e){
+    document.getElementById('weather-main').textContent = 'Météo indisponible';
+    document.getElementById('weather-sub').textContent = 'Vérifie ta connexion';
+    document.getElementById('weather-advice').textContent = '';
+  }
+}
+
+// ── FATIGUE ───────────────────────────────────────────────
+const SESSIONS = [
+  {name:'Mar — HT Sweet Spot', tss:90, color:'var(--purple)'},
+  {name:'Mer — Route Z2', tss:55, color:'var(--green)'},
+  {name:'Jeu — HT Seuil', tss:75, color:'var(--purple)'},
+  {name:'Ven — Tempo+Côtes', tss:70, color:'var(--green)'},
+  {name:'Dim — Grande sortie', tss:110, color:'var(--yellow)'},
+];
+let activeWeek = [0,1,2,3,4]; // all sessions by default
+
+function renderFatigue(){
+  const total = activeWeek.reduce((s,i)=>s+SESSIONS[i].tss,0);
+  const lvl = fatigueLevel(total);
+  document.getElementById('tss-val').textContent = total+' TSS';
+  document.getElementById('tss-label').textContent = 'Charge '+lvl.label.toLowerCase();
+  document.getElementById('tss-tip').textContent = lvl.tip;
+  const circle = document.getElementById('fatigue-circle');
+  circle.style.borderColor = lvl.color;
+  circle.textContent = total < 300 ? '😊' : total < 400 ? '💪' : total < 500 ? '😤' : '🔥';
+
+  const bars = document.getElementById('tss-bars');
+  const maxTss = 120;
+  bars.innerHTML = SESSIONS.map((s,i)=>{
+    const on = activeWeek.includes(i);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;opacity:${on?1:0.35}">
+      <div style="font-size:11px;color:var(--muted);width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+      <div style="flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${on?Math.round(s.tss/maxTss*100):0}%;background:${s.color};border-radius:99px;transition:width .4s"></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted);width:40px;text-align:right">${on?s.tss:0} TSS</div>
+    </div>`;
+  }).join('');
+
+  // chips
+  const chips = document.getElementById('week-chips');
+  chips.innerHTML = SESSIONS.map((s,i)=>`
+    <div class="chip ${activeWeek.includes(i)?'active':''}" onclick="toggleSession(${i})">${s.name.split('—')[0].trim()}</div>
+  `).join('');
+}
+
+function toggleSession(i){
+  if(activeWeek.includes(i)) activeWeek=activeWeek.filter(x=>x!==i);
+  else activeWeek.push(i);
+  renderFatigue();
+}
+
+// ── PACE RENDER ───────────────────────────────────────────
+function renderPace(){
+  const km=S.km, dp=S.dp, wl=weeksLeft();
+  const pkm = paceKm(), pdp = paceDp();
+
+  // KM pace
+  const pkmEl=document.getElementById('pace-km-val');
+  pkmEl.textContent=(pkm>=0?'+':'')+fmt(pkm)+' km';
+  pkmEl.style.color=pkm>=0?'var(--green)':'var(--red)';
+  document.getElementById('pace-km-lab').textContent=pkm>=0?'En avance sur le rythme':'En retard sur le rythme';
+  document.getElementById('pb-km').style.width=pct(km,TARGET_KM)+'%';
+  document.getElementById('pb-km-pct').textContent=pct(km,TARGET_KM)+'% — reste '+fmt(TARGET_KM-km)+' km';
+
+  // DP pace
+  const pdpEl=document.getElementById('pace-dp-val');
+  pdpEl.textContent=(pdp>=0?'+':'')+fmt(pdp)+' m';
+  pdpEl.style.color=pdp>=0?'var(--green)':'var(--red)';
+  document.getElementById('pace-dp-lab').textContent=pdp>=0?'En avance sur le rythme':'En retard sur le rythme';
+  document.getElementById('pb-dp').style.width=pct(dp,TARGET_DP)+'%';
+  document.getElementById('pb-dp-pct').textContent=pct(dp,TARGET_DP)+'% — reste '+fmt(TARGET_DP-dp)+' m';
+
+  document.getElementById('wl-weeks').textContent=wl;
+  document.getElementById('r-km').textContent=fmt(Math.ceil((TARGET_KM-km)/wl))+' km';
+  document.getElementById('r-dp').textContent=fmt(Math.ceil((TARGET_DP-dp)/wl))+' m';
+  document.getElementById('r-days').textContent=daysToDeadline();
+
+  // Milestones
+  const ke=document.getElementById('pal-km'),de=document.getElementById('pal-dp');
+  ke.innerHTML=''; de.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const v=i*500,done=km>=v;
+    ke.innerHTML+=`<div style="background:var(--card);border:1px solid ${done?'var(--green)':'var(--border)'};border-radius:8px;padding:8px 4px;text-align:center;${done?'background:#0a1a10':''}"><div style="font-size:11px;font-weight:700;color:${done?'var(--green)':'var(--muted)'}">${v}</div><div style="font-size:9px;color:var(--muted);margin-top:2px">${done?'✓':'km'}</div></div>`;
+  }
+  for(let i=1;i<=10;i++){
+    const v=i*5000,done=dp>=v;
+    de.innerHTML+=`<div style="background:var(--card);border:1px solid ${done?'var(--green)':'var(--border)'};border-radius:8px;padding:8px 4px;text-align:center;${done?'background:#0a1a10':''}"><div style="font-size:11px;font-weight:700;color:${done?'var(--green)':'var(--muted)'}">${fmt(v)}</div><div style="font-size:9px;color:var(--muted);margin-top:2px">${done?'✓':'m D+'}</div></div>`;
+  }
+
+  if(km>=TARGET_KM&&dp>=TARGET_DP) document.getElementById('success').style.display='block';
+
+  // Strava header indicator
+  const hdrs=document.getElementById('hdr-strava');
+  if(S.strava_token) hdrs.textContent = S.last_sync?'Strava ✓ · '+ new Date(S.last_sync).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'Strava connecté';
+  else hdrs.innerHTML='<a href="strava.html" style="color:var(--orange)">Connecter Strava →</a>';
+
+  // Inputs
+  document.getElementById('i-km').value=S.km||'';
+  document.getElementById('i-dp').value=S.dp||'';
+  document.getElementById('i-ftp').value=S.ftp||'';
+}
+
+function saveManual(){
+  const km=parseFloat(document.getElementById('i-km').value)||S.km;
+  const dp=parseFloat(document.getElementById('i-dp').value)||S.dp;
+  const ftp=parseFloat(document.getElementById('i-ftp').value)||S.ftp;
+  S={...S,km,dp,ftp};
+  saveState(); renderPace(); renderFatigue();
+  const btn=document.querySelector('.btn-primary');
+  btn.textContent='✓ Sauvegardé !';
+  setTimeout(()=>btn.textContent='💾 Sauvegarder',1500);
+}
+
+// ── INIT ─────────────────────────────────────────────────
+renderPace();
+renderFatigue();
+loadWeather();
+</script>
+</body></html>
