@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan 8 semaines — FTP 235W</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+  :root{
+    --bg: #12151a;
+    --panel: #1a1f26;
+    --panel-2: #20262f;
+    --line: #2c333d;
+    --text: #eef1f5;
+    --text-dim: #9aa4b2;
+    --text-faint: #66707d;
+
+    --c-repos: #5b6472;
+    --c-recup: #4fb3c9;
+    --c-z2: #4caf6e;
+    --c-ss: #e0b94f;
+    --c-seuil: #e0813f;
+    --c-vo2: #e15a5a;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 48px;
+  }
+
+  .wrap{ max-width: 720px; margin: 0 auto; padding: 0 14px; }
+
+  /* ---------- HEADER ---------- */
+  header{
+    padding: 28px 14px 18px;
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(circle at 85% -10%, rgba(224,129,63,0.16), transparent 55%),
+      var(--bg);
+  }
+  header .wrap{ padding:0; }
+  .eyebrow{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    color: var(--c-seuil);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  h1{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sub{ color: var(--text-dim); font-size: 13.5px; }
+
+  /* ---------- SECTION LABEL ---------- */
+  .section-label{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 26px 0 10px;
+    padding: 0 2px;
+  }
+
+  /* ---------- REPERES FTP (quick reference) ---------- */
+  .ftp-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    margin-top: 10px;
+  }
+  .ftp-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--zc);
+    border-radius: 8px;
+    padding: 9px 10px;
+  }
+  .ftp-card .zn{ font-size: 11.5px; color: var(--text-dim); margin-bottom: 3px; }
+  .ftp-card .w{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .ftp-card .pc{ font-size: 10.5px; color: var(--text-faint); margin-top: 1px; }
+
+  /* ---------- OVERVIEW (8-week volume) ---------- */
+  .ov-row{
+    display: grid;
+    grid-template-columns: 78px 1fr 52px;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 2px;
+    border-bottom: 1px solid var(--line);
+  }
+  .ov-row:last-of-type{ border-bottom: none; }
+  .ov-wk{ font-size: 12.5px; font-weight: 600; color: var(--text); }
+  .ov-phase{ font-size: 10.5px; color: var(--text-faint); }
+  .ov-bar-track{ height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+  .ov-bar-fill{ height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--c-ss), var(--c-seuil)); }
+  .ov-vol{ font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); text-align: right; }
+  .ov-goal{ grid-column: 2 / 4; font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+  /* ---------- WEEK BLOCK ---------- */
+  .week{ margin-top: 22px; }
+  .week-head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0 2px 8px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 8px;
+  }
+  .week-head h2{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16.5px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .week-head .tag{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+
+  /* ---------- DAY ROW ---------- */
+  .day{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--zc);
+    border-radius: 9px;
+    padding: 10px 12px;
+    margin-bottom: 7px;
+  }
+  .day.rest{ opacity: 0.68; }
+  .day-top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .day-name{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    min-width: 74px;
+  }
+  .day-type{
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--zc);
+    flex: 1;
+  }
+  .day-stats{
+    display: flex;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .day-stats span b{ color: var(--text); font-weight: 600; }
+  .day-detail{
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--line);
+  }
+  .day.rest .day-detail{ border-top: none; padding-top: 2px; margin-top: 2px; }
+
+  /* ---------- LEGEND ---------- */
+  .legend{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-top: 10px;
+    padding: 12px 12px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+  .legend-item{ display:flex; align-items:center; gap:6px; font-size: 11.5px; color: var(--text-dim); }
+  .dot{ width:9px; height:9px; border-radius:50%; background: var(--zc); flex-shrink:0; }
+
+  footer{
+    text-align:center;
+    color: var(--text-faint);
+    font-size: 11px;
+    margin-top: 30px;
+    padding: 0 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Cycle 8 semaines · Déload intégré</div>
+    <h1>Plan d'entraînement</h1>
+    <div class="sub">FTP de référence : <strong style="color:var(--text)">235 W</strong> — Progression FTP + capacité VO2max</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- REPERES FTP -->
+  <div class="section-label">Repères de puissance</div>
+  <div class="ftp-grid">
+    <div class="ftp-card" style="--zc:var(--c-recup)"><div class="zn">Récupération</div><div class="w">110–135 W</div><div class="pc">47–57 % FTP</div></div>
+    <div class="ftp-card" style="--zc:var(--c-z2)"><div class="zn">Z2 endurance</div><div class="w">135–165 W</div><div class="pc">57–70 % FTP</div></div>
+    <div class="ftp-card" style="--zc:var(--c-ss)"><div class="zn">Sweet Spot</div><div class="w">195–210 W</div><div class="pc">83–89 % FTP</div></div>
+    <div class="ftp-card" style="--zc:var(--c-seuil)"><div class="zn">Seuil</div><div class="w">205–220 W</div><div class="pc">87–94 % FTP</div></div>
+    <div class="ftp-card" style="--zc:var(--c-vo2)"><div class="zn">VO2max</div><div class="w">245–270 W</div><div class="pc">104–115 % FTP</div></div>
+    <div class="ftp-card" style="--zc:var(--c-repos)"><div class="zn">Repos</div><div class="w">—</div><div class="pc">—</div></div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="--zc:var(--c-repos)"></span>Repos</div>
+    <div class="legend-item"><span class="dot" style="--zc:var(--c-recup)"></span>Récupération</div>
+    <div class="legend-item"><span class="dot" style="--zc:var(--c-z2)"></span>Z2</div>
+    <div class="legend-item"><span class="dot" style="--zc:var(--c-ss)"></span>Sweet Spot</div>
+    <div class="legend-item"><span class="dot" style="--zc:var(--c-seuil)"></span>Seuil</div>
+    <div class="legend-item"><span class="dot" style="--zc:var(--c-vo2)"></span>VO2max</div>
+  </div>
+
+  <!-- VUE D'ENSEMBLE -->
+  <div class="section-label">Vue d'ensemble du cycle</div>
+  <div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 1</div><div class="ov-phase">Construction</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:90%"></div></div><div class="ov-goal">Poser les bases : sweet spot + VO2max, volume modéré</div></div>
+      <div class="ov-vol">7h10</div>
+    </div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 2</div><div class="ov-phase">Construction</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:92%"></div></div><div class="ov-goal">Légère hausse du volume, sweet spot en durée</div></div>
+      <div class="ov-vol">7h20</div>
+    </div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 3</div><div class="ov-phase">Construction</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:92%"></div></div><div class="ov-goal">Introduction du seuil (2×20), pic avant déload</div></div>
+      <div class="ov-vol">7h20</div>
+    </div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 4</div><div class="ov-phase">Déload</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:64%"></div></div><div class="ov-goal">Récupération active — assimiler le bloc précédent</div></div>
+      <div class="ov-vol">5h05</div>
+    </div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 5</div><div class="ov-phase">Intensification</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:100%"></div></div><div class="ov-goal">Reprise à charge plus haute, seuil + VO2max</div></div>
+      <div class="ov-vol">8h00</div>
+    </div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 6</div><div class="ov-phase">Intensification</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:96%"></div></div><div class="ov-goal">Sorties longues avec blocs sweet spot enchaînés</div></div>
+      <div class="ov-vol">7h40</div>
+    </div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 7</div><div class="ov-phase">Intensification</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:88%"></div></div><div class="ov-goal">Pic du cycle : seuil 15 min × 3, VO2max</div></div>
+      <div class="ov-vol">7h00</div>
+    </div>
+    <div class="ov-row">
+      <div><div class="ov-wk">Semaine 8</div><div class="ov-phase">Déload + Test</div></div>
+      <div><div class="ov-bar-track"><div class="ov-bar-fill" style="width:50%"></div></div><div class="ov-goal">Réduction de charge puis test de 30 min (nouvelle FTP)</div></div>
+      <div class="ov-vol">4h00</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEMAINE 1 ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 1</h2><span class="tag">Construction</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos complet</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Sweet Spot</div><div class="day-stats"><span><b>1h</b></span><span><b>83–87%</b></span><span>RPE <b>6–7</b></span></div></div><div class="day-detail">15 min échauffement + 3 × 10 min à 195–205 W + 5 min récup (51–60%) + retour au calme. RPE 6,5–7/10</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>60–68%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">140–160 W, cadence naturelle, conversation facile</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">VO2</div><div class="day-stats"><span><b>1h</b></span><span><b>106–113%</b></span><span>RPE <b>8–9</b></span></div></div><div class="day-detail">15 min échauffement + 5 × 3 min à 250–265 W + 3 min récup (51–60%). Pas de sprint, puissance homogène</div></div>
+
+    <div class="day" style="--zc:var(--c-recup)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Récupération</div><div class="day-stats"><span><b>45–60min</b></span><span><b>47–57%</b></span><span>RPE <b>3–4</b></span></div></div><div class="day-detail">110–135 W. Si fatigue → repos</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>2h</b></span><span><b>57–70%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">135–165 W, régulier, aucun effort violent</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>1h15</b></span><span><b>79–83%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">45 min Z2 + 2 × 10 min à 185–195 W + 5 min récup (51–60%)</div></div>
+  </div>
+
+  <!-- ===================== SEMAINE 2 ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 2</h2><span class="tag">Construction</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Sweet Spot</div><div class="day-stats"><span><b>1h</b></span><span><b>83–89%</b></span><span>RPE <b>6–7</b></span></div></div><div class="day-detail">3 × 12 min à 195–210 W + 5 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>60–70%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">140–165 W</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">VO2</div><div class="day-stats"><span><b>1h</b></span><span><b>106–115%</b></span><span>RPE <b>8–9</b></span></div></div><div class="day-detail">6 × 3 min à 250–270 W + 3 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-recup)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Récupération</div><div class="day-stats"><span><b>45min</b></span><span><b>47–57%</b></span><span>RPE <b>3–4</b></span></div></div><div class="day-detail">110–135 W</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>2h15</b></span><span><b>81–85%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">1h30 à 140–165 W + 3 × 8 min à 190–200 W + 4 min récup (51–60%) + retour en Z2</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>1h15–1h30</b></span><span><b>60–85%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">140–165 W + 1 effort de 5 min à ~200 W (85%). Sans dépasser</div></div>
+  </div>
+
+  <!-- ===================== SEMAINE 3 ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 3</h2><span class="tag">Construction</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-seuil)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Seuil</div><div class="day-stats"><span><b>1h10</b></span><span><b>87–91%</b></span><span>RPE <b>7–8</b></span></div></div><div class="day-detail">15 min échauffement + 2 × 20 min à 205–215 W + 7 min récup (51–60%) + retour au calme</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>60–68%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">140–160 W</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">VO2</div><div class="day-stats"><span><b>1h</b></span><span><b>104–113%</b></span><span>RPE <b>8–9</b></span></div></div><div class="day-detail">5 × 4 min à 245–265 W + 4 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-recup)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Récupération</div><div class="day-stats"><span><b>45min/repos</b></span><span><b>47–57%</b></span><span>RPE <b>3–4</b></span></div></div><div class="day-detail">Repos ou 45 min récup à 110–135 W</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>2h30</b></span><span><b>81–85%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">1h45 à 140–165 W + 2 × 15 min à 190–200 W + 5 min récup (51–60%) + retour tranquille</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h15</b></span><span><b>57–66%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">Z2 très tranquille, 135–155 W</div></div>
+  </div>
+
+  <!-- ===================== SEMAINE 4 — DÉLOAD ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 4 — Déload</h2><span class="tag">Déload</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Sweet Spot</div><div class="day-stats"><span><b>50–60min</b></span><span><b>83–87%</b></span><span>RPE <b>6–7</b></span></div></div><div class="day-detail">3 × 8 min à 195–205 W + 4 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>45–60min</b></span><span><b>57–66%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">Z2 facile, 135–155 W</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">VO2</div><div class="day-stats"><span><b>45–50min</b></span><span><b>104–111%</b></span><span>RPE <b>8–9</b></span></div></div><div class="day-detail">4 × 3 min à 245–260 W + récup complète (51–60%)</div></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h30</b></span><span><b>57–66%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">Z2 facile, 135–155 W</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>51–62%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">Très facile, 120–145 W</div></div>
+  </div>
+
+  <!-- ===================== SEMAINE 5 ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 5</h2><span class="tag">Intensification</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-seuil)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Seuil</div><div class="day-stats"><span><b>1h10</b></span><span><b>87–91%</b></span><span>RPE <b>7–8</b></span></div></div><div class="day-detail">3 × 15 min à 205–215 W + 5 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>60–70%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">140–165 W</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">VO2</div><div class="day-stats"><span><b>1h</b></span><span><b>106–115%</b></span><span>RPE <b>8–9</b></span></div></div><div class="day-detail">5 × 4 min à 250–270 W + 4 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-recup)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Récupération</div><div class="day-stats"><span><b>45–60min</b></span><span><b>47–57%</b></span><span>RPE <b>3–4</b></span></div></div><div class="day-detail">110–135 W</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>2h30</b></span><span><b>83–87%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">1h30 à 140–165 W + 3 × 10 min à 195–205 W + 5 min récup (51–60%) + retour en Z2</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>1h30</b></span><span><b>60–85%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">140–165 W + 1 × 15 min à 200 W (85%)</div></div>
+  </div>
+
+  <!-- ===================== SEMAINE 6 ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 6</h2><span class="tag">Intensification</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-seuil)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Seuil</div><div class="day-stats"><span><b>1h10</b></span><span><b>87–91%</b></span><span>RPE <b>7–8</b></span></div></div><div class="day-detail">2 × 25 min à 205–215 W + 8 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>60–70%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">140–165 W</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>60–68%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">140–160 W</div></div>
+
+    <div class="day" style="--zc:var(--c-recup)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Récupération</div><div class="day-stats"><span><b>45min/repos</b></span><span><b>47–57%</b></span><span>RPE <b>3–4</b></span></div></div><div class="day-detail">110–135 W ou repos</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>2h45</b></span><span><b>83–89%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">1h45 Z2 (140–165 W) + 20 min à 195–205 W + 5 min facile (51–60%) + 15 min à 200–210 W + retour facile</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h15–1h30</b></span><span><b>57–66%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">Très facile, 135–155 W</div></div>
+  </div>
+
+  <!-- ===================== SEMAINE 7 ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 7</h2><span class="tag">Intensification</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-seuil)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Seuil</div><div class="day-stats"><span><b>1h15</b></span><span><b>89–94%</b></span><span>RPE <b>7–8</b></span></div></div><div class="day-detail">3 × 15 min à 210–220 W + 5 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>1h</b></span><span><b>60–70%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">140–165 W</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">VO2</div><div class="day-stats"><span><b>1h</b></span><span><b>104–111%</b></span><span>RPE <b>8–9</b></span></div></div><div class="day-detail">4 × 5 min à 245–260 W + 5 min récup (51–60%)</div></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">Z2 + Sweet Spot</div><div class="day-stats"><span><b>2h45–3h</b></span><span><b>83–89%</b></span><span>RPE <b>5–7</b></span></div></div><div class="day-detail">Z2 majoritaire (140–165 W) + 3 × 12 min à 195–210 W + 5 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-recup)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Récupération</div><div class="day-stats"><span><b>1h</b></span><span><b>51–62%</b></span><span>RPE <b>3–4</b></span></div></div><div class="day-detail">Très facile, 120–145 W</div></div>
+  </div>
+
+  <!-- ===================== SEMAINE 8 — DÉLOAD + TEST ===================== -->
+  <div class="week">
+    <div class="week-head"><h2>Semaine 8 — Déload + test</h2><span class="tag">Test final</span></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Lundi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-ss)"><div class="day-top"><div class="day-name">Mardi</div><div class="day-type">Sweet Spot</div><div class="day-stats"><span><b>50min</b></span><span><b>85–89%</b></span><span>RPE <b>6–7</b></span></div></div><div class="day-detail">3 × 8 min à 200–210 W + 4 min récup (51–60%)</div></div>
+
+    <div class="day" style="--zc:var(--c-z2)"><div class="day-top"><div class="day-name">Mercredi</div><div class="day-type">Z2</div><div class="day-stats"><span><b>45–60min</b></span><span><b>57–66%</b></span><span>RPE <b>4–5</b></span></div></div><div class="day-detail">Z2 facile, 135–155 W</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Jeudi</div><div class="day-type">VO2</div><div class="day-stats"><span><b>45min</b></span><span><b>106–111%</b></span><span>RPE <b>8–9</b></span></div></div><div class="day-detail">3 × 3 min à 250–260 W + récup complète</div></div>
+
+    <div class="day rest" style="--zc:var(--c-repos)"><div class="day-top"><div class="day-name">Vendredi</div><div class="day-type">Repos</div></div><div class="day-detail">Repos</div></div>
+
+    <div class="day" style="--zc:var(--c-vo2)"><div class="day-top"><div class="day-name">Samedi</div><div class="day-type">★ Test 30 min</div><div class="day-stats"><span><b>30min</b></span><span><b>~85%+</b></span><span>RPE <b>9–10</b></span></div></div><div class="day-detail">Pacing régulier. 5 premières min ~200 W (85%), puis augmente progressivement (pas de départ à 250+ W). Accélération finale si possible. Noter puissance moyenne, normalisée, FC moy/max, RPE</div></div>
+
+    <div class="day" style="--zc:var(--c-recup)"><div class="day-top"><div class="day-name">Dimanche</div><div class="day-type">Récupération</div><div class="day-stats"><span><b>1h</b></span><span><b>51–62%</b></span><span>RPE <b>3–4</b></span></div></div><div class="day-detail">120–145 W</div></div>
+  </div>
+
+</div>
+
+<footer>Volumes estimés à partir des points médians de chaque durée — à titre indicatif.</footer>
+
+</body>
+</html>
